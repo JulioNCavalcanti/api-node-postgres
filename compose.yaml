@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - POSTGRESDB_USER=${DB_USER}
+      - POSTGRESDB_DATABASE=${DB_DATABASE}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - db:/var/lib/postgres
+  api-node:
+    depends_on:
+      - postgres
+    build: .
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - ${API_LOCAL_PORT}:${API_DOCKER_PORT}
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DOCKER_PORT=${DB_DOCKER_PORT}
+    stdin_open: true
+    tty: true
+volumes:
+  db:
